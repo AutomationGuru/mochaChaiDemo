@@ -1,33 +1,70 @@
 import 'babel-polyfill';
 import chai from 'chai';
-import http from 'http';
+import https from 'https';
 import fetch from 'node-fetch';
 const expect = chai.expect
 
 let assert= chai.assert;    
-let array1 =['1','2'];
+const mockApiUrl='https://reqres.in/';  
 
-describe('length of the array verify',()=>{
-    it('should always be 2',()=>{
-        assert.equal(array1.length,2);
-    })
-})
+const existAndNumberAssert = (element) => {
+    assert.exists(element);
+    assert.isNumber(element); 
+}
 
-describe('Verify Api call',()=>{
+const assertEachDataBlock = (dataElement) => {
+    assert.exists(dataElement.id);
+    console.log(dataElement.id)
+    assert.isNumber(dataElement.id)
+    assert.exists(dataElement.first_name);
+    assert.isString(dataElement.first_name)
+    assert.exists(dataElement.last_name); 
+    assert.isString(dataElement.last_name)
+    assert.exists(dataElement.avatar);
+    assert.isString(dataElement.avatar);
+}
+
+describe('Verify Api call using callback done',()=>{
     it('should always be 200',(done)=>{
-        http.get('http://samples.openweathermap.org/data/2.5/forecast?q=London,GB',(response)=>{
-            assert.equal(response.statusCode,200);     
+        https.get(mockApiUrl+'api/users',(response)=>{
+            assert.equal(200,response.statusCode);     
             done()
         })     
     })
 })  
 
-describe('Verify Api call with Async',()=>{
+describe('Verify User Api call with Async/Await',()=>{
     it('should always be 200', async () => {
-        const response = await fetch('http://samples.openweathermap.org/data/2.5/forecast?q=London,GB');
-        const json = await response.json();
-        console.log(response.json());
-        assert.equal(response.statusCode,200);     
+        let response = await fetch(mockApiUrl+'api/users');
+        let json = await response.json();        
+        assert.equal(200,response.status); 
+        describe('verify the json response',()=>{
+            it('The response body must contain Page, total page and data',()=>{
+                existAndNumberAssert(json.page)
+                existAndNumberAssert(json.total_pages)
+                existAndNumberAssert(json.per_page)
+                assert.exists(json.data)
+            })
+            for(let i=0; i < json.total_pages;i++){
+                it('data in each page must have `json.per_page` ', async ()=>{
+                    assert.equal(json.per_page, json.data.length);
+                    response = await fetch(mockApiUrl+'api/users?page='+(i+1))
+                    json = await response.json(); 
+                    console.log(json.data.length);                     
+                    for(let z=0; z < json.data.length;z++){                        
+                        describe('verifying each data block', ()=>{
+                            it('The data block must contain, id, first name, last name and textlink', () => {                            
+                                assertEachDataBlock(json.data[z]);
+                                // it('the text link for the image must be valid',()=>{
+    
+                                // })
+                            })    
+                        })
+                    }
+                })                
+            }
+        }) 
+        
     })
 })
 
