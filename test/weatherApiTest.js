@@ -2,11 +2,42 @@ import 'babel-polyfill';
 import chai from 'chai';
 import https from 'https';
 import fetch from 'node-fetch';
+var Validator = require('jsonschema').Validator;    
 const expect = chai.expect
 
 let assert= chai.assert;    
 const mockApiUrl='https://reqres.in/';  
 const appendUsersReq='api/users';
+
+var userSchema = {
+    "id": "/SimpleUser",
+    "type": "object",
+    "properties": {
+        "page": {"type": "integer", "minimum": 1},
+        "per_page": {"type": "integer", "minimum": 1},
+        "total": {"type": "integer", "minimum": 1},
+        "total_pages": {"type": "integer", "minimum": 1},
+        "data":{
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type":"integer"},    
+                    "first_name": {"type":"string"},
+                    "last_name": {"type":"string"},
+                    "avatar": {"type":"string", "pattern": "^https"}
+                }
+            }
+        }            
+    },
+    "required": ["page", "per_page","total","total_pages","data"]
+  };
+  
+var v = new Validator();
+v.addSchema(userSchema, '/SimpleUser');
+
 
 const existAndNumberAssert = (element) => {
     assert.exists(element);
@@ -41,7 +72,7 @@ describe('Verify User Api call with Async/Await',()=>{
 
     before(async ()=>{
         response = await fetch(mockApiUrl+'api/users');
-        json = await response.json();            
+        json = await response.json();   
     });
 
 
@@ -66,10 +97,13 @@ describe('Verify User Api call with Async/Await',()=>{
                         assertEachDataBlock(json.data[z]);                                    
                     }
                 })
+                it('Jason structure is',()=>{
+                    assert.isTrue(v.validate(json, userSchema).errors.length == 0 ,v.validate(json, userSchema).errors)    
+                })  
             })
                          
         }    
-    })
+    })    
 })
 
 
