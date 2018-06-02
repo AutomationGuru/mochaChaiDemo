@@ -1,7 +1,13 @@
+import {validator,Validator} from 'jsonschema';
+
 export const mockApiUrl='https://reqres.in/';  
 export const appendUsersReq='api/users';
+export const appendUsersPage=appendUsersReq+'?page=';
 
+export let validateJson = new Validator();
+validateJson.addSchema(userSchema, '/SimpleUser');
 
+// Json schema with rules can be added to assert it by approval tests   
 export const userSchema = {
     "id": "/SimpleUser",
     "type": "object",
@@ -27,21 +33,3 @@ export const userSchema = {
     },
     "required": ["page", "per_page","total","total_pages","data"]
   };
-
- export let existAndNumberAssert = (element) => {
-    assert.exists(element);
-    assert.isNumber(element); 
-}
-
-export let assertEachDataBlock = async (dataElement) => {
-    assert.exists(dataElement.id);
-    assert.isNumber(dataElement.id)
-    assert.exists(dataElement.first_name);
-    assert.isString(dataElement.first_name)
-    assert.exists(dataElement.last_name); 
-    assert.isString(dataElement.last_name)
-    assert.exists(dataElement.avatar);
-    assert.isString(dataElement.avatar);  
-    const response = await fetch(dataElement.avatar);
-    assert.equal(200,response.status); 
-}
