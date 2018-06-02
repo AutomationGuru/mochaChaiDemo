@@ -2,60 +2,12 @@ import 'babel-polyfill';
 import chai from 'chai';
 import https from 'https';
 import fetch from 'node-fetch';
-var Validator = require('jsonschema').Validator;    
-const expect = chai.expect
+import {validator,Validator} from 'jsonschema';
+import {userSchema,mockApiUrl,appendUsersReq} from '../Utils/userApiUtils';
+import {existAndNumberAssert,assertEachDataBlock,assert} from '../Utils/assertUtil';
 
-let assert= chai.assert;    
-const mockApiUrl='https://reqres.in/';  
-const appendUsersReq='api/users';
-
-var userSchema = {
-    "id": "/SimpleUser",
-    "type": "object",
-    "properties": {
-        "page": {"type": "integer", "minimum": 1},
-        "per_page": {"type": "integer", "minimum": 1},
-        "total": {"type": "integer", "minimum": 1},
-        "total_pages": {"type": "integer", "minimum": 1},
-        "data":{
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 3,
-            "items": {
-                "type": "object",
-                "properties": {
-                    "id": {"type":"integer"},    
-                    "first_name": {"type":"string"},
-                    "last_name": {"type":"string"},
-                    "avatar": {"type":"string", "pattern": "^https"}
-                }
-            }
-        }            
-    },
-    "required": ["page", "per_page","total","total_pages","data"]
-  };
-  
-var v = new Validator();
+let v = new Validator();
 v.addSchema(userSchema, '/SimpleUser');
-
-
-const existAndNumberAssert = (element) => {
-    assert.exists(element);
-    assert.isNumber(element); 
-}
-
-const assertEachDataBlock = async (dataElement) => {
-    assert.exists(dataElement.id);
-    assert.isNumber(dataElement.id)
-    assert.exists(dataElement.first_name);
-    assert.isString(dataElement.first_name)
-    assert.exists(dataElement.last_name); 
-    assert.isString(dataElement.last_name)
-    assert.exists(dataElement.avatar);
-    assert.isString(dataElement.avatar);  
-    const response = await fetch(dataElement.avatar);
-    assert.equal(200,response.status); 
-}
 
 describe('Verify Api call using callback done',()=>{
     it('should always be 200',(done)=>{
