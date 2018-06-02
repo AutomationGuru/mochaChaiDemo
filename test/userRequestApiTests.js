@@ -2,8 +2,8 @@ import 'babel-polyfill';
 import chai from 'chai';
 import https from 'https';
 import fetch from 'node-fetch';
-import { userSchema, mockApiUrl, appendUsersReq, appendUsersPage, validateJson } from '../utils/userApiUtil';
-import { existAndNumberAssert, assertEachDataBlock, assert } from '../utils/assertUtil';
+import { userSchema, mockApiUrl, appendUsersReq, appendUsersPage, validateJson } from '../util/userApiUtil';
+import { existAndNumberAssert, assertEachDataBlock, assert } from '../util/assertUtil';
 
 /*
 This test Suite covers various different test that assert:
