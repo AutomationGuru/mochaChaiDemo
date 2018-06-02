@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import chai from 'chai';
 import https from 'https';
 import fetch from 'node-fetch';
-import { userSchema, mockApiUrl, appendUsersReq, appendUsersPage, validateJson } from '../util/userApiUtil';
+import { userSchema, userCreated, userUpdated, mockApiUrl, appendUsersReq, appendUsersPage, appendUsersNotFound, validateJson } from '../util/userApiUtil';
 import { existAndNumberAssert, assertEachDataBlock, assert } from '../util/assertUtil';
 
 /*
@@ -46,7 +46,7 @@ describe(`Verify Api call ${mockApiUrl}${appendUsersReq} with Async/Await`, () =
     let json;
     // Run once before all tests
     before(async () => {
-        response = await fetch(mockApiUrl + 'api/users');
+        response = await fetch(mockApiUrl + appendUsersReq);
         json = await response.json();
     });
 
@@ -80,7 +80,7 @@ describe(`Verify Api call ${mockApiUrl}${appendUsersReq} with Async/Await`, () =
 
         }
     })
-})
+}).timeout(300);
 
 /*
 Doing the same as above but not parsing the json but comapring the json schema 
@@ -113,4 +113,68 @@ describe(`Verify Api call agin ${mockApiUrl}${appendUsersReq}`, () => {
     })
 })
 
+/*
+    get with a response 404
+*/
+describe('Get a unknown user', () => {
+    it('Verify that the response is 404', async () => {
+        let response = await fetch(appendUsersNotFound);
+        assert.equal(404, response.status);
+    })
+
+})
+
+/*
+*   
+*      2. POST/PUT ASSERTIONS
+*        Given i need to create a set of user
+*        when i post https://reqres.in/api/users
+*        then i must see that the response is 201
+*        and the json response has user created
+*        and on subsequent update has a valid 200 response
+*
+*/
+describe('Create a new user using POST', () => {
+    let newUser = {
+        "name": "morpheus",
+        "job": "leader"
+    }
+    let response;
+    let json;
+    it('Posting a new user and the response must be 201', async () => {
+        response = await fetch(mockApiUrl + appendUsersReq, { method: 'POST', body: `${newUser}` })
+        json = await response.json();
+        assert.equal(201, response.status);
+    })
+    it('Verify the response json after POST', () => {
+        assert.isTrue(validateJson.validate(json, userCreated).errors.length == 0, validateJson.validate(json, userCreated).errors)
+    })
+    it('Update the User created using PUT', async () => {
+        let newUserUpdate = {
+            "name": "morpheus",
+            "job": "leader Of Zeus"
+        }
+        response = await fetch(mockApiUrl + appendUsersReq, { method: 'PUT', body: `${newUser}` })
+        json = await response.json();
+        assert.equal(200, response.status);
+    })
+    it('Verify the response after a PUT', () => {
+        assert.isTrue(validateJson.validate(json, userUpdated).errors.length == 0, validateJson.validate(json, userUpdated).errors)
+    })
+})
+
+/*
+*   
+*      3. DELETE ASSERTIONS
+*        Given i need to Delete a  user
+*        when i DELETE https://reqres.in/api/users
+*        then i must see that the response is 204
+*
+*/
+describe('Delete the existing user', () => {
+    it('post a delete request and it must be 204', async () => {
+        let response = await fetch(mockApiUrl + appendUsersReq + '/2', { method: 'DELETE' });
+        assert.equal(204, response.status);
+    })
+})
 
