@@ -31,6 +31,10 @@ npm test
     _Async/await_ 
 * Skips: a testcase/test suite can be skipped by appending it to the _describe_ or _it_ block
 * TimeOuts: Timeout can be also set at suite/test case and if set at suite level its inherited by all test and also can be set at the hook level
+* Running test/test suites and specific test file
+    to run specific test
+    npm test -- --spec=test/<testname>.js
+    npm test // runs all test suite inside test folder
 [More about Mocha] 
 (https://mochajs.org/)
 # CHAI
