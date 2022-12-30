@@ -17,7 +17,7 @@
     "babel-register": "^6.26.0",
     "chai": "^4.2.0",
     "jsonschema": "^1.2.6",
-    "mocha": "^6.2.3",
+    "mocha": "^10.2.0",
     "node-fetch": "^2.6.0"
   }
 }
